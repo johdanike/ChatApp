@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class Server implements Runnable{
 
     private ArrayList<ConnectionHandler> connections;
+    private ServerSocket server;
+    private boolean done;
 
     public Server(){
         connections = new ArrayList<>();
@@ -17,10 +19,12 @@ public class Server implements Runnable{
     @Override
     public void run() {
         try {
-            ServerSocket serverSocket = new ServerSocket(9999);
-            Socket client = serverSocket.accept();
-            ConnectionHandler connectionHandler = new ConnectionHandler(client);
-            connections.add(connectionHandler);
+            while (!done) {
+                server = new ServerSocket(9999);
+                Socket client = server.accept();
+                ConnectionHandler connectionHandler = new ConnectionHandler(client);
+                connections.add(connectionHandler);
+            }
         } catch (IOException ioException) {
 //            TODO: handle
         }
@@ -31,6 +35,12 @@ public class Server implements Runnable{
             if (connectionHandler != null) {
                 connectionHandler.sendMessage(message);
             }
+        }
+    }
+
+    public void shutdown(){
+        if (!server.isClosed()){
+            server.close();
         }
     }
 
